@@ -1,41 +1,44 @@
 import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../context/authContext"; // Ensure correct import
-import { Link } from "react-router-dom";
+import { AuthContext } from "../context/authContext";
+import { Navigate } from "react-router-dom";
 import supabase from "../supabase/supabaseClient";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const context = useContext(AuthContext);
-  const { isLoggedIn, userEmail, login, logout } = context;
-
-  const handleAuthStateChange = async (event, session) => {
-    if (session && session.user) {
-      login(session.user.email);
-    } else {
-      logout();
-    }
-  };
+  const { isLoggedIn, login, logout } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    let timer;
+    const handleAuthStateChange = async (event, session) => {
+      if (session && session.user) {
+        login(session.user.email);
+      } else {
+        logout();
+      }
+      // Setting loading to false only if the timer has completed
+      timer = setTimeout(() => {
+        setLoading(false);
+      }, 2000); // Minimum 2 seconds loading time
+    };
+
+    // Subscribe to auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
       handleAuthStateChange
     );
+
+    // Cleanup subscription on component unmount
     return () => {
       authListener.subscription.unsubscribe();
+      clearTimeout(timer); // Clear the timer on unmount
     };
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error("Error signing out:", error.message);
-    }
-  };
+  }, [login, logout]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true); // Show loader during form submission
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -43,53 +46,58 @@ const LoginPage = () => {
       });
       if (error) {
         console.error("Error signing in:", error.message);
+      } else {
+        console.log("Sign in successful");
       }
     } catch (error) {
       console.error("Error signing in:", error.message);
+    } finally {
+      setSubmitting(false); // Hide loader after submission
     }
   };
 
+  if (loading || submitting) {
+    return (
+      <div className="flex h-[100vh] items-center justify-center gap-4">
+        <span className="block h-8 w-8 bg-blue-500 rounded-full animate-bounce delay-0"></span>
+        <span className="block h-8 w-8 bg-blue-500 rounded-full animate-bounce delay-100"></span>
+        <span className="block h-8 w-8 bg-blue-500 rounded-full animate-bounce delay-200"></span>
+      </div>
+    );
+  }
+
+  if (isLoggedIn) {
+    return <Navigate to="/user" />;
+  }
+
   return (
     <div>
-      {isLoggedIn ? (
-        <div className="flex flex-col items-center justify-center h-[100vh]">
-          <h2 className="text-xl font-bold pb-2">Logged in as:</h2>
-          <div>
-            <p className="border-2 border-black p-2 text-xl font-semibold">{userEmail}</p>
-          </div>
-            <button className="mt-2 border-2 border-black p-2" onClick={handleLogout}>Logout</button>
-        </div>
-      ) : (
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col w-1/5 m-4 justify-start"
+      >
+        <label htmlFor="email">Email:</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border-2 border-black p-2"
+          required
+        />
+        <label htmlFor="password">Password:</label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="border-2 border-black p-2"
+          required
+        />
         <div>
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col w-1/5 m-4 justify-start"
-          >
-            <label htmlFor="email">Email:</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="border-2 border-black p-2"
-              required
-            />
-            <label htmlFor="password">Password:</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="border-2 border-black p-2"
-              required
-            />
-            <div>
-              <button className="border-2 border-black mt-2 p-2" type="submit">Log in</button>
-            </div>
-            <Link to="/register">
-              <button className="border-2 border-black mt-2 p-2" type="button">Register</button>
-            </Link>
-          </form>
+          <button className="border-2 border-black mt-2 p-2" type="submit">
+            Log in
+          </button>
         </div>
-      )}
+      </form>
     </div>
   );
 };

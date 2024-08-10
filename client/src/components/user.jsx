@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../context/authContext";
 import { Navigate } from "react-router-dom";
 import supabase from "../supabase/supabaseClient";
@@ -19,14 +19,14 @@ const User = () => {
   };
 
   if (isLoggedOut) {
-    return <Navigate to="/" />;
+    return <Navigate to="/home" />;
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-[100vh]">
+    <div className="flex flex-col items-center justify-center text-white">
       <h2 className="text-xl font-bold pb-2">Logged in as:</h2>
       <div>
-        <p className="border-2 border-black p-2 text-xl font-bo">{userEmail}</p>
+        <p className="border-2 border-black p-2 text-xl font-bold">{userEmail}</p>
       </div>
       <button className="mt-2 border-2 border-black p-2" onClick={handleLogout}>
         Logout

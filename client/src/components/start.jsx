@@ -28,7 +28,7 @@ const Start = () => {
   }, []);
 
   return (
-    <div className="bg-gradient-to-b from-blue-500 to-pink-500 h-[100vh] w-full relative">
+    <main className="bg-gradient-to-b from-blue-500 to-pink-500 h-[100vh] w-full relative">
       <Link
         to="/home"
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-black px-6 py-2 rounded-lg hover:bg-[#ffffff52] text-xl ${
@@ -58,7 +58,7 @@ const Start = () => {
       >
         <FaArrowDown />
       </div>
-    </div>
+    </main>
   );
 };
 

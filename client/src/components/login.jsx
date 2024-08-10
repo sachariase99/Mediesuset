@@ -21,7 +21,7 @@ const LoginPage = () => {
       // Setting loading to false only if the timer has completed
       timer = setTimeout(() => {
         setLoading(false);
-      }, 2000); // Minimum 2 seconds loading time
+      }, 1000); // Minimum 1 second loading time
     };
 
     // Subscribe to auth state changes
@@ -58,7 +58,7 @@ const LoginPage = () => {
 
   if (loading || submitting) {
     return (
-      <div className="flex h-[100vh] items-center justify-center gap-4">
+      <div className="flex items-center justify-center gap-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <span className="block h-8 w-8 bg-blue-500 rounded-full animate-bounce delay-0"></span>
         <span className="block h-8 w-8 bg-blue-500 rounded-full animate-bounce delay-100"></span>
         <span className="block h-8 w-8 bg-blue-500 rounded-full animate-bounce delay-200"></span>
@@ -71,7 +71,7 @@ const LoginPage = () => {
   }
 
   return (
-    <div>
+    <div className="text-white">
       <form
         onSubmit={handleSubmit}
         className="flex flex-col w-1/5 m-4 justify-start"
@@ -81,7 +81,7 @@ const LoginPage = () => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border-2 border-black p-2"
+          className="border-2 border-black p-2 text-black"
           required
         />
         <label htmlFor="password">Password:</label>
@@ -89,7 +89,7 @@ const LoginPage = () => {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border-2 border-black p-2"
+          className="border-2 border-black p-2 text-black"
           required
         />
         <div>

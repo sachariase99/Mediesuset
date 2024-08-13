@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/authContext";
 import { Navigate } from "react-router-dom";
-import supabase from "../supabase/supabaseClient";
+import { useSupabase } from "../supabase/supabaseClient";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");

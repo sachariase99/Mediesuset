@@ -1,6 +1,7 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
+import Posts from "./posts";
 
 const Home = () => {
   const { isLoggedIn } = useContext(AuthContext);
@@ -14,7 +15,7 @@ const Home = () => {
 
   return (
     <main>
-      Home
+      <Posts />
     </main>
   );
 };

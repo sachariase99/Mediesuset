@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/authContext";
 import { Navigate } from "react-router-dom";
 import { useSupabase } from "../supabase/supabaseClient";
@@ -9,6 +9,33 @@ const User = () => {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const [imageUrl, setImageUrl] = useState(defaultImage);
   const { supabase } = useSupabase();
+
+  useEffect(() => {
+    const fetchProfileImageUrl = async () => {
+      // Ensure that userEmail is not null or undefined
+      if (!userEmail) {
+        return;
+      }
+
+      try {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("image_url")
+          .eq("email", userEmail)
+          .single(); // Use .single() to get a single object instead of an array
+
+        if (error) {
+          console.error("Error fetching profile:", error.message);
+        } else if (profile && profile.image_url) {
+          setImageUrl(profile.image_url); // Set the image URL if it exists
+        }
+      } catch (error) {
+        console.error("Error fetching profile image URL:", error.message);
+      }
+    };
+
+    fetchProfileImageUrl();
+  }, [supabase, userEmail]);
 
   const handleLogout = async () => {
     try {
@@ -21,10 +48,8 @@ const User = () => {
     }
   };
 
-  const submitForm = async (event) => {
-    event.preventDefault();
-    const fileInput = event.target.elements.image;
-    const file = fileInput.files[0];
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
     if (!file) {
       console.error("No file selected");
       return;
@@ -33,6 +58,7 @@ const User = () => {
     const fileName = `${Date.now()}_${file.name}`;
 
     try {
+      // Upload file
       const { data, error } = await supabase.storage
         .from("profile-images")
         .upload(fileName, file, {
@@ -46,7 +72,7 @@ const User = () => {
 
       console.log("Upload successful, file path:", data.path);
 
-      // Generate public URL
+      // Get public URL
       const { data: publicUrlData } = supabase.storage
         .from("profile-images")
         .getPublicUrl(data.path);
@@ -54,9 +80,22 @@ const User = () => {
       const publicUrl = publicUrlData.publicUrl;
       console.log("Public URL generated:", publicUrl);
 
-      setImageUrl(publicUrl);  // Set the public URL to imageUrl
+      // Update profile with the new image URL
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ image_url: publicUrl })
+        .eq("email", userEmail);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      console.log("Profile image URL updated successfully in the database.");
+
+      // Set the new image URL to state
+      setImageUrl(publicUrl);
     } catch (error) {
-      console.error("Error uploading file:", error.message);
+      console.error("Error uploading file or updating profile:", error.message);
     }
   };
 
@@ -71,10 +110,14 @@ const User = () => {
         <p className="border-2 border-black p-2 text-xl font-bold mt-2">
           {userEmail}
         </p>
-        <form onSubmit={submitForm} id="upload-form">
+        <form id="upload-form">
           <label htmlFor="image">Select an image to upload:</label>
-          <input type="file" id="image" accept="image/*" required />
-          <button type="submit">Upload</button>
+          <input
+            type="file"
+            id="image"
+            accept="image/*"
+            onChange={handleFileChange} // Automatically trigger upload on file select
+          />
         </form>
         <img src={imageUrl || defaultImage} alt="Uploaded file or default" />
       </div>

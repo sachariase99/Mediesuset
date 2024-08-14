@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSupabase } from "../supabase/supabaseClient";
 
@@ -7,6 +7,9 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate(); // Initialize useNavigate hook
+
+    // Destructure the supabase instance from the useSupabase hook
+    const { supabase } = useSupabase();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

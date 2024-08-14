@@ -8,9 +8,9 @@ import { SupabaseProvider } from "./supabase/supabaseClient.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <SupabaseProvider>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </SupabaseProvider>
   </React.StrictMode>
 );

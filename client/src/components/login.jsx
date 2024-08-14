@@ -10,6 +10,9 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // Destructure the supabase instance from the useSupabase hook
+  const { supabase } = useSupabase();
+
   useEffect(() => {
     let timer;
     const handleAuthStateChange = async (event, session) => {
@@ -34,7 +37,7 @@ const LoginPage = () => {
       authListener.subscription.unsubscribe();
       clearTimeout(timer); // Clear the timer on unmount
     };
-  }, [login, logout]);
+  }, [login, logout, supabase]); // Ensure `supabase` is included in the dependency array
 
   const handleSubmit = async (e) => {
     e.preventDefault();
